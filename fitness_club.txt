@@ -1,0 +1,103 @@
+CREATE TABLE `bookings` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `booking_time` datetime NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+CREATE TABLE `capacity` (
+  `id` int(11) NOT NULL,
+  `capacity` int(11) NOT NULL DEFAULT '20',
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+INSERT INTO `capacity` (`id`, `capacity`, `updated_at`) VALUES
+(1, 20, '2025-05-05 08:33:16');
+
+
+CREATE TABLE `subscription_requests` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `tariff_id` int(11) DEFAULT NULL,
+  `status` enum('pending','approved','rejected') NOT NULL DEFAULT 'pending',
+  `requested_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+CREATE TABLE `tariffs` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `max_visits` int(11) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `description` text,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+INSERT INTO `tariffs` (`id`, `name`, `max_visits`, `price`, `description`, `created_at`) VALUES
+(1, 'Start tarifi', 8, '200000.00', 'Ayına 8 márte zalǵa jazılıw imkaniyatı', '2025-05-05 08:33:02'),
+(2, 'Pro tarifi', 16, '350000.00', 'Ayına 16 márte zalǵa jazılıw imkaniyatı', '2025-05-05 08:33:02'),
+(3, 'VIP tarifi', 20, '500000.00', 'Ayına 20 márte zalǵa jazılıw imkaniyatı', '2025-05-05 08:33:02');
+
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `role` enum('admin','member') NOT NULL DEFAULT 'member',
+  `subscription_status` enum('active','inactive','pending') NOT NULL DEFAULT 'inactive',
+  `tariff_id` int(11) DEFAULT NULL,
+  `current_visits` int(11) DEFAULT '0',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+
+INSERT INTO `users` (`id`, `name`, `email`, `password`, `role`, `subscription_status`, `tariff_id`, `current_visits`, `created_at`) VALUES
+(0, 'Admin', 'admin@gmail.com', '$2y$10$PuiLq5r7VzDrA.RO6p442.tsty6Efm1K0jiUdZ6iimc6J4wLemUI6', 'admin', 'inactive', NULL, 0, '2025-05-05 08:44:50');
+
+
+ALTER TABLE `bookings`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`);
+
+ALTER TABLE `capacity`
+  ADD PRIMARY KEY (`id`);
+
+
+ALTER TABLE `subscription_requests`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `tariff_id` (`tariff_id`);
+
+ALTER TABLE `tariffs`
+  ADD PRIMARY KEY (`id`);
+
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `email` (`email`);
+
+ALTER TABLE `bookings`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+ALTER TABLE `capacity`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+ALTER TABLE `subscription_requests`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+
+ALTER TABLE `tariffs`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+ALTER TABLE `users`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+ALTER TABLE `bookings`
+  ADD CONSTRAINT `bookings_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
+
+
+ALTER TABLE `subscription_requests`
+  ADD CONSTRAINT `subscription_requests_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
+  ADD CONSTRAINT `subscription_requests_ibfk_2` FOREIGN KEY (`tariff_id`) REFERENCES `tariffs` (`id`);
